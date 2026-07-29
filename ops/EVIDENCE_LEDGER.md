@@ -1,0 +1,46 @@
+# Evidence Ledger
+
+The quantitative record of **why confidence changed**. Every meaningful observation gets a stable
+ID; confidence-register movements and decision-log entries **cite evidence IDs instead of prose**, so
+any belief in the program can be traced back to the specific evidence that justifies it.
+
+**Classification:** `Engineering` · `Verification` · `Measurement` · `Data-quality` · `Methodology` ·
+`Scientific`. **Confidence impact** uses ↑ / ↓ / → against the affected Confidence-Register
+component(s). An entry is a *fact on the record*; whether it promotes anything still requires the
+stopping rules (a ledger entry is never a Finding).
+
+| ID | Date | Evidence | Classification | Confidence impact | Affected components | Refs |
+|---|---|---|---|---|---|---|
+| E-001 | 2026-07-06 | FanDuel live-flag bug fixed (read `inPlay` on the market, not the event); live FanDuel quotes captured for the first time | Engineering | ↑ Collector, ↑ Feed quality | Collector, Feed | collector v1.1 |
+| E-002 | 2026-07-06 | Re-arm SPOF fixed: re-arm moved into an `always()` step so a platform cancellation no longer stops collection | Engineering | ↑ Collector | Collector | EP-2, ED-6, GD-1 |
+| E-003 | 2026-07-09 | 11 consecutive re-arms (#16→#27), 0 failures, verified against the GitHub Actions API; continuous 3-day checkpointing | Verification | ↑ Collector | Collector | EP-2 |
+| E-004 | 2026-07-09 | Integrity independently reproduced at 103,494 rows: 0 malformed / missing / duplicate / future-ts (under the tool's field definition) | Verification | → Integrity (maintained) | Integrity, Dataset | ED-4 |
+| E-005 | 2026-07-09 | FanDuel densified (~1k→~10k live quotes); cumulative median sync lag collapsed 640→30 s — confirmed as a forward-fill artifact, not a market change | Measurement | ↑ Measurement (understanding), → Science | Feed, Synchronization | EP-1 |
+| E-006 | 2026-07-09 | SR-1 sync sub-gate is quantized to {0}∪[30 s,∞) by the 30 s poll interval; a PASS at median 0 certifies collector co-capture, not <15 s market contemporaneity | Methodology | ↓ Protocol (gate validity) | Protocol, SR-1 | RD-1, ED-2, GD-3 |
+| E-007 | 2026-07-09 | Pinnacle is stillborn — 6 pregame rows in one burst, 0 live quotes ever; root cause unknown | Engineering / Verification | ↓ Feed quality; holds Paper 2 readiness Low | Feed, Paper 2 readiness | ED-1, RD-2, KU-1 |
+| E-008 | 2026-07-09 | bovada emits no `marketStatus` on any of 27,988 rows; OPEN/SUSPENDED/REMOVED is FanDuel-only (single-book status) | Data-quality | ↓ Feed quality | Feed, Safeguards | RD-4, ED-5 |
+| E-009 | 2026-07-09 | 61 FanDuel rows (36 live) carry null odds and pass the integrity gate (odds not a required field); odds heavy-tailed | Data-quality | ↓ bounds the "integrity clean" claim | Integrity | RD-5, ED-4 |
+| E-010 | 2026-07-09 | `book_panel` interleaves 2–3 alternate total lines per (game,book,ts) with no main-vs-alt discriminator (~95% of groups) | Data-quality / Methodology | ↓ threatens line-based inference | Feed, SR-1 pairs | RD-3, ED-3 |
+| E-011 | 2026-07-09 | Adversarial audit: live panels are 100% July (0/103,494 June rows), temporally/book/data-type disjoint from Paper 1's sample | Verification | → Paper 1 (unchallenged, confirmed) | Paper 1 | — |
+| E-012 | 2026-07-09 | 576 nominal cross-book "arbs" dissolved under scrutiny (median divergence 3.6 pp; concentrated in near-settled / suspended / status-unverifiable legs; same-poll co-presence, not executable) | Verification / Rejected | → Science (no evidence of inefficiency) | — | A-01 |
+| E-013 | 2026-07-11 | Re-arm chain now 22 consecutive clean re-arms (#16→#38), 0 failures since the pre-fix #14; continuous ~15-min checkpoints across 07-09→07-11 (verified via Actions API) | Verification | → Collector (High, firmer) | Collector | EP-2 |
+| E-014 | 2026-07-11 | Cumulative SR-1 median sync lag moved **30 s (07-09) → 91 s (07-10/11)** — non-monotonic; a further symptom of the implementation-dependent metric, not a synchronization regression | Measurement / Methodology | ↓ confidence in the sync-lag metric (not the system) | Synchronization, SR-1 | RD-1, E-006 |
+| E-015 | 2026-07-11 | SR-1 overlap-games broke its plateau: 30 → 37 (07-10) → 45 (07-11) as new games enrolled | Dataset / Verification | ↑ Dataset maturity | Dataset, SR-1 | EP-4 |
+| E-016 | 2026-07-19 | **Falsification of the book-heterogeneity claim.** Controlling for RD-3 (isolate the balanced main line) and sampling density (both books poll at ~30 s): the *update-frequency* difference **survives** — FanDuel re-prices its main line **4.7× more often** than Bovada (53/60 games; 92 s vs 916 s median between changes). The *pricing-tightness* claim **fails** — my v0.1 "FanDuel more internally consistent (vig IQR 0.36 vs 1.80 pp)" was an alt-line artifact; on the main line Bovada is tighter (0.05 vs 0.31 pp IQR). *(Magnitude superseded by E-017.)* | Measurement / Instrumentation | ↑ confidence that the books differ **behaviorally** (frequency); ↓ confidence in the specific pricing-consistency characterization (self-correction) | Book heterogeneity, Cross-book inference | RD-8, RD-3, A-10, GD-10 |
+| E-017 | 2026-07-19 | **Attack on Assumption #4 (main-line extraction is well-defined).** Three reasonable "main line" definitions (balanced-odds, modal anchor, median line) **agree only 28.6%** of the time. E-016's frequency *direction* survives all three (FanDuel ≥ Bovada) but its **magnitude does not**: 4.7× (balanced) / **1.1× (modal anchor)** / 9.5× (median). The strong "4.7×" is a balanced-odds flitting artifact; under the anchor definition the books re-price at nearly the same rate. Vig-tightness reversal (Bovada tighter) holds under balanced+modal, not median. | Measurement / Methodology | ↓ confidence in the *magnitude* of book heterogeneity; ↑ confidence that extraction choice is a live confound. Assumption #4 **refuted** as a definition-invariant operation. | Main-line extraction, Book heterogeneity, all cross-book inference | E-016, RD-3, A-10, A-11 |
+| E-018 | 2026-07-19 | **Attack on Assumption #2/#5 (is cross-book leadership identifiable from 2 books at 30 s?).** Matched main-line transition events (1,019 across 60 games): naive result "FanDuel leads +92 s (74%)" is frequency-confounded, so ran a base-rate placebo — a matching FanDuel move precedes a Bovada move **36%** vs follows **18%** (+17 pp, 2:1); the reverse test is negative (Bovada leads FanDuel −6 pp). A frequency artifact would be time-symmetric (~0), so the directional signal **survives**. **Invariant to main-line definition** (modal ≡ balanced, identical output), which is why A-11 is frozen. **NOT separable from feed latency vs information** (open); game-clustered n, single 16-day window, SR-1 still BLOCKED. | Scientific (identifiability) — *methodological feasibility only, NOT a gated finding* | ↑ confidence that leadership is **identifiable** (contra the prior presumption 2 books couldn't); **no** market-efficiency claim; stays behind SR-1 | Cross-book leadership, Paper 2 estimand, SR-1 | A-11 (frozen), A-12, RD-1, RD-8 |
+| E-019 | 2026-07-28 | **SR-1 Criterion 3 (overlap games) CLEARED: 102/100** (independently recomputed from the raw panels, not the collector self-report). Three of four SR-1 criteria now pass: pairs 51,146/2,000 ✅, sync lag 0.0 s ✅, overlap games 102/100 ✅, **books quoting live 2/3 ⬜**. Gate overall 91% and **still BLOCKED**. The third book is now the *sole* remaining blocker, arriving on the schedule flagged 2026-07-26. Pinnacle dead 22.5 days. | Dataset / Verification (a gate state change, **not** a finding) | ↑ Dataset maturity. **No** confidence in any scientific claim moved; no analysis authorized or run. | SR-1, Dataset, Cross-book capability | GD-9, GD-12, E-015, RD-2 |
+
+## How the ledger is used
+
+- **Confidence Register** movements cite the E-IDs that justify them; a level never moves without a
+  ledger citation. (Existing register basis text is being migrated to E-ID citations as it is next
+  touched — new movements cite E-IDs from the outset.)
+- **Governance Decision Log** entries cite the evidence they acted on.
+- **Inference Graph** edges cite E-IDs on the path from observation to any paper claim.
+
+## Discipline
+
+An entry records evidence, not a conclusion. Classification is about the *kind* of evidence, not its
+importance. A `↑ Measurement, → Science` impact (e.g., E-005) is the common and correct shape: the
+instrument got better, the science did not move. Never log an interpretation as evidence.

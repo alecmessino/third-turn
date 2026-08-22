@@ -192,7 +192,7 @@ reproduction (Section 3.5).
 
 The study draws on 163 Major League Baseball games played in June 2026, each observed from three
 aligned sources. **Market prices.** Live full-game total (over/under) lines were recorded as
-one-minute trajectories from a single Pinnacle-grade feed. From each trajectory we take the main
+one-minute trajectories from a single sharp-book feed. From each trajectory we take the main
 balanced total, the handicap at which the over and under prices sit closest to even. This is the
 market's median-outcome forecast of final total runs, and it serves as the incumbent forecast; its
 implied over probability feeds the calibration diagnostics. Appendix B details how a snapshot's
@@ -320,6 +320,15 @@ of the market forecast, the remaining-runs model, the encompassing tests, and th
 function, an executable form of the protocol in Section 3.3. The frozen result files and the
 scripts that produce them are sufficient to reconstruct every figure and number without access to
 the original feeds.
+
+The full pipeline, including the collector, is released at
+`https://github.com/alecmessino/third-turn`, with citation metadata in `CITATION.cff`. Release
+`v1.0` corresponds to the results reported here. The environment is Python 3.11.15 with
+dependencies pinned in `requirements-lock.txt`, and the analysis is versioned on three independent
+axes, Protocol 1.0, Collector 1.1, and Benchmark Dataset 2026.06, because method, engineering, and
+data evolve separately. From a clean checkout of the release tag, installing the pinned requirements
+and running the scripts documented in `paper/REPRODUCE.md` regenerates every figure and the
+manuscript from the committed inputs.
 
 ---
 
@@ -579,12 +588,18 @@ field accumulate falsifications rather than scattered one-off backtests.
 We state the conditions under which the conclusion holds, without editorializing. **Scope.** The
 study covers 163 games in a single month (June 2026) of one sport. The boundary is characterized
 precisely, but only under those conditions, and we claim no seasonal or cross-sport generality.
-This sample is deliberately frozen: independent live collection is ongoing, and a temporal
-replication on a later, non-overlapping month is reported separately rather than pooled into these
-estimates, so that the replication is a genuine out-of-sample test of the present result. **Odds source.** Line trajectories come from a single Pinnacle-grade feed
+This sample is deliberately frozen: independent live collection is ongoing, and any temporal
+replication on a later, non-overlapping month would be reported separately rather than pooled into
+these estimates, so that such a replication remains a genuine out-of-sample test of the present
+result. No such replication is reported here. **Odds source.** Line trajectories come from a single sharp-book feed
 sampled at roughly one-minute intervals, so we cannot separate genuine price-formation latency
 from feed cadence, and the uniform sub-one response ratio in the transfer function is consistent
-with either. **Single-book benchmark.** All encompassing tests run against one sharp book; we
+with either. A companion study instruments the delivery path of live sportsbook feeds directly and
+measures what that caveat costs: delivered quote objects carry substantial, book-specific staleness,
+and the interval between publication and observation is not identifiable from public endpoints
+(Messino 2026). That result bears on how the transfer-function timing should be read; it concerns
+when information entered prices rather than whether prices contain it, and leaves the estimates
+reported here unchanged. **Single-book benchmark.** All encompassing tests run against one sharp book; we
 cannot test cross-book agreement or leadership. **Market coverage.** Retail live team totals were
 not exposed by our feeds and are untested, as are first-five-inning totals. **Ground truth.** The
 remaining-runs model and the RE24 transfer benchmark use published static run values rather than
@@ -748,10 +763,10 @@ forecast error is unpredictable.
 ## Data and code availability
 
 The cleaned data, feature schema, and frozen result files are released as the Third Turn Benchmark
-Dataset (v1), and the Third Turn Protocol is specified in an accompanying document with a
-safeguard registry and objective stopping rules; reference implementations reproduce every number
-reported here from the committed inputs. A persistent DOI and packaged archive are pending
-publication. Until then, materials are available from the author.
+Dataset (v1), openly available at `https://github.com/alecmessino/third-turn` under release tag
+`v1.0`, together with the Third Turn Protocol, its safeguard registry, and its objective stopping
+rules. Reference implementations reproduce every number reported here from the committed inputs. A
+persistent archival DOI is being minted and will be added on deposit.
 
 ## References
 
@@ -778,6 +793,9 @@ Giacomini, R., and H. White (2006). "Tests of Conditional Predictive Ability." *
 
 Hanley, J. A., and B. J. McNeil (1982). "The Meaning and Use of the Area Under a Receiver
 Operating Characteristic (ROC) Curve." *Radiology* 143(1): 29-36.
+
+Messino, A. (2026). "What Prices Cannot Tell You: Identifying Information Transmission in Live
+Markets." Working paper, The Third Turn Research Initiative.
 
 Sauer, R. D. (1998). "The Economics of Wagering Markets." *Journal of Economic Literature* 36(4):
 2021-2064.

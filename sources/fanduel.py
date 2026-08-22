@@ -16,11 +16,13 @@ from __future__ import annotations
 
 import re
 import time
+from pathlib import Path
 from typing import Optional
 
 import aiohttp
 
 from shared_piping.headers import rotating_headers
+from shared_piping import provenance as _prov
 from shared_piping.team_map import resolve
 from sources.base import Quote, SourceResult
 
@@ -54,6 +56,10 @@ def _american(runner: dict) -> Optional[int]:
         return int(val)
     except (TypeError, ValueError):
         return None
+
+
+_PROV_LOG = Path(__file__).resolve().parents[1] / "output" / "provenance_probe.jsonl"
+_MKT_LOG = Path(__file__).resolve().parents[1] / "output" / "market_provenance.jsonl"
 
 
 class FanDuelSource:
@@ -109,7 +115,12 @@ class FanDuelSource:
                                         payload_bytes=len(body),
                                         error=f"HTTP {status}")
                 data = await resp.json(content_type=None)
+                _hdrs = dict(resp.headers)
             quotes = self._parse(data, ts=t0)
+            _prov.record(_PROV_LOG,
+                         _prov.capture(self.name, _hdrs, data, quotes=quotes))
+            _prov.record_markets(_MKT_LOG, self.name, _hdrs, data,
+                                 fetch_id=f"{self.name}-{int(t0 * 1000)}")
             return SourceResult(self.name, ok=True, http_status=status,
                                 latency_ms=(time.monotonic() - t0) * 1000,
                                 payload_bytes=len(body), quotes=quotes)

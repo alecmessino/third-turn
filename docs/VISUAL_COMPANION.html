@@ -1,0 +1,96 @@
+<!doctype html><html><head><meta charset='utf-8'><title>The Third Turn: A Visual Companion</title><style>
+@page { size: Letter; margin: 24mm 22mm; }
+html { -webkit-print-color-adjust: exact; }
+body {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 10.5pt; line-height: 1.55; color: #111; margin: 0;
+}
+.titleblock { text-align: center; margin: 0 0 18pt; }
+/* max-width keeps a long title clear of both margins; without it a title can be set
+   flush to the measure and read as clipped. See paper/check_title_margins.py. */
+.titleblock h1 { font-size: 17pt; line-height: 1.3; margin: 0 auto 10pt; max-width: 88%; }
+.epigraph { font-style: italic; color: #444; font-size: 10pt; margin: 0 8% 14pt; }
+.author { font-size: 11pt; margin: 0 0 4pt; }
+.author .affil { font-size: 9.5pt; color: #444; }
+.wp { font-size: 9pt; color: #666; letter-spacing: 0.03em; margin: 0; }
+h2 { font-size: 12.5pt; margin: 20pt 0 6pt; border-bottom: 0.5pt solid #bbb; padding-bottom: 2pt; }
+h3 { font-size: 11pt; margin: 14pt 0 4pt; }
+p { margin: 0 0 8pt; text-align: justify; hyphens: auto; }
+blockquote {
+  margin: 10pt 0; padding: 8pt 12pt; background: #f6f6f4;
+  border-left: 2.5pt solid #888; break-inside: avoid;
+}
+blockquote p { margin: 0 0 6pt; text-align: left; }
+blockquote p:last-child { margin-bottom: 0; }
+blockquote h3 { margin-top: 0; }
+code { font-family: 'DejaVu Sans Mono', monospace; font-size: 9pt; background: #f2f2f0; padding: 0 2px; }
+hr { border: none; border-top: 0.5pt solid #ccc; margin: 16pt 0; }
+p:has(> img) { text-align: center; margin: 14pt 0 4pt; break-inside: avoid; break-after: avoid; }
+/* Figures are authored at the full text measure (figstyle.FULL_W), so they display
+   at scale 1.0 and a point inside a figure is a point on paper. Narrowing this
+   silently shrinks every internal label -- see figstyle's production contract. */
+img { max-width: 100%; }
+p:has(> img) + p { font-size: 9pt; color: #333; text-align: center; margin: 0 6% 18pt;
+                   break-before: avoid; break-inside: avoid; }
+table { border-collapse: collapse; font-size: 8.4pt; margin: 10pt auto 14pt; width: 100%; }
+th { border-top: 1pt solid #333; border-bottom: 0.5pt solid #333; padding: 3pt 5pt; text-align: left; }
+td { border-bottom: 0.25pt solid #ccc; padding: 3pt 5pt; vertical-align: top;
+     text-align: left; hyphens: auto; overflow-wrap: break-word; }
+table { break-inside: auto; }
+tr { break-inside: avoid; }
+.protocol-box {
+  border: 1pt solid #999; background: #fafafa; padding: 9pt 12pt 6pt;
+  margin: 14pt auto; max-width: 82%; break-inside: avoid;
+}
+.protocol-box .pb-title { font-weight: bold; font-size: 9.5pt; margin-bottom: 4pt; }
+.protocol-box p { font-size: 9.5pt; margin: 0 0 3pt; text-align: left; }
+.footnote { font-size: 8.5pt; color: #222; margin-top: 14pt; }
+.footnote hr { margin: 10pt 0 6pt; width: 30%; margin-left: 0; border-top: 0.5pt solid #666; }
+.footnote ol { margin: 0 0 0 14pt; padding: 0; }
+.footnote li p { margin: 0 0 5pt; text-align: justify; }
+sup { font-size: 7.5pt; }
+.footnote-backref { display: none; }
+a { color: inherit; text-decoration: none; }
+</style></head><body><div class="titleblock">
+<h1>The Third Turn: A Visual Companion</h1>
+<p class="epigraph">Repository documentation: illustrative figures for talks and curious readers. <strong>This is not part of the paper</strong> and carries no citable claim. The rigorous versions of everything shown here live in the paper's conditional tests; these panels use small buckets and wide intervals and are meant to build intuition, not to support inference.</p>
+<p class="wp">Companion to "Does the Market Already Know?" &middot; July 2026</p>
+</div>
+
+<h2>Line movement: the live total tracks the runs</h2>
+<p>The paper's transfer function measures, across 6,414 events, how far the live total moves after each
+play. This figure shows the same thing for a single game, so the mechanism is visible rather than
+averaged. Everything is reconstructed from the committed snapshots: the live total is the market's
+forecast of remaining runs plus the runs already scored, so it is the actual over/under number a
+bettor would have watched.</p>
+<p><img alt="" src="figures/supp_line_movement.svg" /></p>
+<p><strong>Figure S1.</strong> One game's live over/under from first pitch through the eighth. The number opens at
+the 7.0 pregame total, drifts down through three scoreless innings as the time left to score runs
+out, then climbs with each scoring burst until it meets the runs actually scored at the game's final
+of 13. The shaded gap is the market's live over/under on the rest of the game, and it closes to zero
+as the game ends. This is a sharp market updating in real time, which is exactly why static
+pregame beliefs, however true, do not survive contact with the live line.</p>
+<h2>The run environment: the physics the market already prices</h2>
+<p>Scoring is a function of air density, and air density is a function of temperature, altitude,
+barometric pressure, humidity, and wind. These relationships are well established, and none of them
+is a secret. That is precisely the paper's point: because the run environment is public and
+understood, a sharp market prices it, and in our sample it slightly over-adjusts.</p>
+<p><img alt="" src="figures/supp_weather_diamond.svg" /></p>
+<p><strong>Figure S2.</strong> Warm, thin, high-altitude air lets fly balls carry; a wind blowing out to center adds
+carry, a wind blowing in knocks fly balls down; humid air is, counter-intuitively, slightly less
+dense than dry air, so it too adds a little carry. Weather and park genuinely move runs. On this
+evidence they do not move the price enough to beat it: in the conditional test, hitter-friendly
+overs hit 46 percent against 50 percent, so if anything the market over-adjusts for exactly the
+conditions a bettor would notice. The effect is real; the edge is not.</p>
+<h2>The physical effect, and the market's response, in our own sample</h2>
+<p>Figure S2 is textbook physics. This one is our 163 games. It shows, in a picture, the same thing the
+paper's conditional test found: weather genuinely moves runs, and the market moves the line with it,
+so the edge a naive bettor expects has already been priced away.</p>
+<p><img alt="" src="figures/supp_weather_runs.svg" /></p>
+<p><strong>Figure S3.</strong> Left: mean runs per game climb with hitter-friendly weather, from 7.8 with the wind
+blowing in to 10.0 with it blowing out, and with warmer temperatures. Right: the over's hit rate by
+the same buckets, with 95 percent Wilson intervals. No weather bucket reliably clears the 52.4
+percent break-even, and every interval straddles the coin flip; the apparent warm-weather rate is
+small-sample noise, not a signal. The overall over hit rate is 49 percent. With 163 games the
+buckets are small, so read the direction, not the decimals: the paper's conditional test is the
+rigorous version of this picture, and it reaches the same verdict.</p></body></html>

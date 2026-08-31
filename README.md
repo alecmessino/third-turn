@@ -88,13 +88,29 @@ reproduces from the frozen `output/*.json` caches, and Paper 2's figures are sch
 
 ## License
 
-- **Code:** MIT (`LICENSE`).
-- **Paper text and documentation:** Creative Commons Attribution 4.0 (CC BY 4.0).
-- **Data:** the derived result artifacts in `output/*.json` are released under CC BY 4.0. The
-  Benchmark Dataset (`data/trajectories.jsonl`) contains quoted prices obtained from a third-party
-  odds feed; **its redistribution terms are under review and no licence is asserted over it beyond
-  the research use for which it was released.** Raw live panels are not distributed at all. A
-  persistent archive or DOI will not be minted until that review is complete.
+Both grants below are made by the author, over material the author created. Neither extends to
+anything obtained from a third party.
+
+- **Code:** MIT (`LICENSE`) — the analysis, collection, figure and build scripts.
+- **Manuscripts, figures, the visual companion and documentation:** CC BY 4.0.
+- **Author-created aggregate artifacts:** CC BY 4.0. These are named explicitly rather than by
+  wildcard: `paper/figdata/fig_market_calibration_agg.json`,
+  `paper/figdata/fig_weather_runs_agg.json`, and the summary result files in `output/` that contain
+  only counts, coefficients, rates and confidence intervals. None carries a per-observation value.
+
+**No licence is granted over third-party material, and none is redistributed here.** Sportsbook
+quoted prices and line trajectories, HTTP delivery and provenance metadata, and MLB Advanced Media
+game state and identifiers were obtained from commercial and public endpoints whose own terms govern
+their reuse. The Odds API's terms prohibit redistributing its data as downloadable files; MLB
+Advanced Media permits only individual, non-commercial, non-bulk use absent written authorization.
+Those observations — and every derived file from which an individual quoted line, price, timestamp
+or third-party identifier could be reconstructed — are excluded from this repository and from both
+grants above. They are not offered on request.
+
+Every figure in the papers regenerates from what is published here. One companion figure
+(`supp_line_movement`) is observation-level and ships as a frozen rendered image; its underlying
+series is withheld pending written permission from the data provider. No persistent archive or DOI
+will be minted over any third-party or unresolved derived data.
 
 ## Citation
 

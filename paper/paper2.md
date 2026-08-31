@@ -1,11 +1,11 @@
 <div class="titleblock">
-<h1>What Prices Cannot Tell You: Identifying Information Transmission in Live Markets</h1>
+<h1>What Prices Cannot Tell You: Identification Limits of Information Transmission in High-Frequency Markets</h1>
 <p class="epigraph">A companion study asked whether prices contain public information. This paper asks whether prices reveal how that information entered the market.</p>
 <p class="author">Alec Messino<br/><span class="affil">The Third Turn Research Initiative &middot; alec.messino@gmail.com</span></p>
-<p class="wp">Working Paper &middot; DRAFT, complete &middot; Gate applied: Outcome C &mdash; non-identification</p>
+<p class="wp">Working Paper &middot; August 2026 &middot; Gate applied: Outcome C &mdash; non-identification</p>
 </div>
 
-> **Draft status.** This manuscript is complete through the Discussion. The analysis plan in
+> **Status and scope.** The analysis plan in
 > Section 6.5 is pre-registered, and Section 6.6 fixes four conditions that gate what may be
 > reported. Those conditions have now been applied to the evidence. **The outcome is C: the pricing
 > contrast is not identifiable with this class of instrument.** Condition 3 is satisfied by its
@@ -138,7 +138,7 @@ re-prices every thirty seconds will reach any given price level before a book th
 eight minutes, regardless of which one is better informed. That is not leadership; it is sampling.
 
 Second, the identification problem must be confronted rather than assumed away. The delay we observe
-is a sum of three delays, and only one of them is about pricing. Separating them requires either an
+is a sum of four delays, and only one of them is about pricing. Separating them requires either an
 independent measurement of transport latency or an argument that transport latency is common across
 books. Neither is free, and we do not assume either.
 
@@ -237,9 +237,11 @@ messaging.
 
 The consequence is not that estimation becomes harder. It is that the estimand changes. In the price
 discovery setting the object of inference is a property of the market, and the apparatus is
-transparent. Here the apparatus enters the estimand, and the observed quantity is a sum of a market
-component and two infrastructure components that no amount of additional sampling separates. That is
-the gap this paper occupies.
+transparent. Here the apparatus enters the estimand, and the observed quantity is a sum of four
+terms: the bookmaker's pricing latency, its feed's publication latency, the staleness of the copy
+its distribution path delivers to us, and the sampling delay imposed by our own cadence. Only the
+last is ours to set, and setting it finer separates none of the other three. That is the gap this
+paper occupies.
 
 ### 2.5 Where this paper sits
 
@@ -275,8 +277,8 @@ problem, not the baseball application, is the durable object.
 Consider a discrete, publicly observable event in a baseball game occurring at clock time
 `t_E`: a run scores. The event changes the conditional distribution of the game's final total, and a
 bookmaker offering a live total on that game will, at some point, revise its posted number. An
-outside observer records the revision at some later time. Between the event and the record lie three
-distinct delays, produced by three distinct mechanisms.
+outside observer records the revision at some later time. Between the event and the record lie four
+distinct delays, produced by four distinct mechanisms.
 
 **Pricing latency**, which we write as the interval between the event and the bookmaker's internal
 decision to revise, is the economically meaningful quantity. It reflects how quickly the bookmaker
@@ -503,7 +505,7 @@ researcher what to build.
 
 ![](figures/p2_ladder.png)
 
-**Figure 6.** *Identification requires assumptions, not computation.* The requirements form a ladder, and each rung depends on the one above it. Each rung depends on the one above it. We hold the top
+**Figure 6.** *Identification requires assumptions, not computation.* The requirements form a ladder, and each rung depends on the one above it. We hold the top
 two. The third is a methodological choice we can fix and test. The fourth, knowledge of feed latency,
 is not obtainable from public endpoints, and the fifth depends on it. The colour of the fourth rung
 is what determines whether this paper reports Outcome A, B, or C.
@@ -1131,7 +1133,7 @@ unobserved stage, and the data are the sum of that stage and the plumbing around
 What betting markets add is not a novel problem but an unusually clean setting in which to state it.
 The information arrivals are discrete, publicly visible, and precisely dated; the contracts settle
 against ground truth within hours; and two competing quotes on the identical contract can be observed
-simultaneously. Where a general treatment would be forced into abstraction, here the three stages can
+simultaneously. Where a general treatment would be forced into abstraction, here the four stages can
 be named, the boundary of observation can be drawn, and the conditions for identification can be
 written down and checked. A setting in which the problem is tractable is worth more to the literature
 than a setting in which it is merely important.
@@ -1160,9 +1162,6 @@ public information and could answer it, because every node it needed was observa
 timestamp whose interpretation depends on assumptions rather than on computation. The first paper
 ends in a finding. The second ends, at best, in a set of conditions.
 
----
-
-*Sections 8 (Results) and 9 (Discussion) are intentionally not drafted. See Section 6.6.*
 
 ## Data and code availability
 
@@ -1175,7 +1174,8 @@ paper are schematic and rebuild without any data access.
 The observational records underlying Sections 5 and 7 — the two-book quote panel, the game-state
 panel, and the per-market provenance and delivery-probe records — are **not redistributed**. They
 were obtained from commercial and public sportsbook endpoints whose terms govern their reuse, and
-that review is not complete. They are available to researchers on request, subject to those terms.
+that review is not complete. No redistribution is offered or implied while it remains open; any
+future access would be subject to those terms and to the outcome of that review.
 Readers should therefore treat the panel statistics reported in Section 7 as verifiable against the
 committed record and the analysis code, but not independently recomputable from this release.
 Field-level documentation for every panel — including the delivery-metadata fields on which the

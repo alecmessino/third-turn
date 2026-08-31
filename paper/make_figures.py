@@ -21,12 +21,14 @@ BOUNDARY we identify — never a "negative result."
 from __future__ import annotations
 
 import json
+import json
 import math
 import sys
 from pathlib import Path
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 from matplotlib.patches import Patch, FancyBboxPatch, FancyArrowPatch
 
 HERE = Path(__file__).resolve().parent
@@ -90,7 +92,7 @@ def fig2_graveyard():
     txtcol = {P: "white", F: "white", N: fs.MUTED}
 
     fs.setup()
-    fig, ax = plt.subplots(figsize=(8.4, 5.0))
+    fig, ax = plt.subplots(figsize=(fs.FULL_W, 4.4))
     nrows, ncols = len(rows), len(stages)
     for i, (_, cells) in enumerate(rows):
         y = nrows - 1 - i
@@ -111,13 +113,13 @@ def fig2_graveyard():
         s.set_visible(False)
     ax.grid(False)
     ax.set_title("Each public-information candidate, tested against the market forecast",
-                 pad=26, fontsize=12)
+                 pad=26, fontsize=12, wrap=True)
     legend = [Patch(facecolor=fs.PASS, label="cleared this test"),
               Patch(facecolor=fs.FAIL, label="failed here"),
               Patch(facecolor=fs.GRID, label="not reached")]
     ax.legend(handles=legend, loc="upper center", bbox_to_anchor=(0.5, -0.04),
               ncol=3, fontsize=9, handlelength=1.1)
-    fig.savefig(FIGDIR / "hypothesis_elimination.png", bbox_inches="tight")
+    fs.save_at_measure(fig, FIGDIR / "hypothesis_elimination.png")
     plt.close(fig)
     return rows
 
@@ -128,11 +130,19 @@ def fig2_graveyard():
 def fig3_encompassing():
     e = _load("encompass.json")
     fs.setup()
-    fig, (axL, axR) = plt.subplots(1, 2, figsize=(9.2, 4.2),
-                                   gridspec_kw={"width_ratios": [1, 1.25]})
+    # Left/right is fixed by the caption, so the panels stay side by side and the
+    # left one is given room instead: a wider share, taller canvas for the
+    # title/annotation stack, and category labels broken onto short lines. At
+    # [1, 1.25] the left panel was ~2.7in and "Market + features" alone needed
+    # ~1.06in against 0.9in of slot.
+    fig, (axL, axR) = plt.subplots(1, 2, figsize=(fs.FULL_W, 4.5),
+                                   gridspec_kw={"width_ratios": [1, 1.12]})
+    # Panel spacing is the layout engine's: constrained_layout ignores
+    # subplots_adjust and warns, and the width_ratios above already give the
+    # left panel the room its three-line tick labels need.
 
     # left — three forecasts
-    labels = ["Our features\n(Y ~ X)", "Sharp market\n(Y ~ B)", "Market + features\n(Y ~ B+X)"]
+    labels = ["Our\nfeatures\n(Y ~ X)", "Sharp\nmarket\n(Y ~ B)", "Market\n+ features\n(Y ~ B+X)"]
     vals = [e["r2_features"], e["r2_market"], e["r2_both"]]
     cols = [fs.PALETTE[1], fs.PALETTE[0], fs.PALETTE[2]]
     x = np.arange(3)
@@ -142,14 +152,15 @@ def fig3_encompassing():
                  fontsize=10, fontweight="bold", color=fs.INK)
     # visual annotation over the combined bar — tells the reader what they're seeing
     axL.annotate("no incremental\ninformation", xy=(2, vals[2] + 0.004),
-                 xytext=(2, vals[2] + 0.052), ha="center", va="bottom", fontsize=8.6,
+                 xytext=(2, vals[2] + 0.070), ha="center", va="bottom", fontsize=8.6,
                  color=fs.PALETTE[3], fontweight="bold",
                  arrowprops=dict(arrowstyle="-", color=fs.PALETTE[3], linewidth=1))
     axL.set_xticks(x)
     axL.set_xticklabels(labels, fontsize=9)
     axL.set_ylabel("out-of-sample R²  (remaining runs)")
-    axL.set_ylim(0, max(vals) * 1.18)
-    axL.set_title("Adding features to the market: ΔR² = %+.3f" % e["encompass_gain"],
+    axL.set_ylim(0, max(vals) * 1.34)   # clear space for the annotation
+    # Both panel titles are set to two lines so their baselines align.
+    axL.set_title("Adding features to the market:\nΔR² = %+.3f" % e["encompass_gain"],
                   fontsize=11, pad=10)
 
     # right — per-feature incremental ΔR² beyond the market (E+)
@@ -172,12 +183,17 @@ def fig3_encompassing():
     axR.set_yticks(y)
     axR.set_yticklabels(names, fontsize=9)
     axR.set_xlabel("incremental R² beyond the market  (Y~B+Xi − Y~B)")
-    axR.set_title("Every feature, individually encompassed", fontsize=11)
-    axR.text(0.0032, len(names) - 0.6, "±0.003\nnegligible band", fontsize=7.5,
-             color=fs.MUTED, va="center")
+    axR.set_title("Every feature,\nindividually encompassed", fontsize=11, pad=10)
+    # Mid-height, hard right. The bars are sorted by value, so the middle rows are
+    # the ones inside the negligible band and their bars are the shortest -- the only
+    # part of the panel guaranteed clear. (The bottom-right corner is not: bars grow
+    # from zero, so the longest negative bar reaches the zero rule at the bottom row
+    # and the label overprinted its tip.)
+    axR.text(0.985, 0.52, "±0.003\nnegligible band", transform=axR.transAxes,
+             fontsize=8.5, color=fs.MUTED, va="center", ha="right")
     fig.suptitle("The sharp market statistically encompasses every public variable we measure",
-                 fontsize=12.5, fontweight="bold")
-    fig.savefig(FIGDIR / "forecast_encompassing.png", bbox_inches="tight")
+                 fontsize=12.5, fontweight="bold", wrap=True)
+    fs.save_at_measure(fig, FIGDIR / "forecast_encompassing.png")
     plt.close(fig)
 
 
@@ -193,8 +209,13 @@ def fig4_debiasing():
         ("DEBIASED\nearly-window decline", 0.524, 319, fs.PALETTE[0]),
     ]
     fs.setup()
-    fig, (axL, axR) = plt.subplots(1, 2, figsize=(11.2, 5.0),
-                                   gridspec_kw={"width_ratios": [0.95, 1.0]})
+    # Stacked, not side by side. At half the text measure each panel was ~3.4in
+    # wide: the flow diagram's boxes clipped their own labels and the bar chart's
+    # three category labels overprinted one another. Each panel now gets the full
+    # measure, which is what both of them needed.
+    fig, (axL, axR) = plt.subplots(2, 1, figsize=(fs.FULL_W, 7.4),
+                                   gridspec_kw={"height_ratios": [1.0, 0.95]})
+    # Row spacing likewise belongs to constrained_layout.
 
     # ---- LEFT: the survivorship flow (why the raw signal is post-treatment) ----
     axL.set_xlim(0, 10); axL.set_ylim(0, 10); axL.axis("off")
@@ -215,11 +236,11 @@ def fig4_debiasing():
     _farrow(5.9, 8.35, 7.6, 6.95, color=fs.PASS)
     _fbox(0.25, 5.5, 3.9, 1.45, "#ECECEC", ec=fs.GRID)
     axL.text(2.2, 6.42, "pulled or shelled early", ha="center", va="center", color=fs.MUTED,
-             fontsize=8.4, fontweight="bold")
+             fontsize=8.5, fontweight="bold")
     axL.text(2.2, 6.02, "(before the 3rd time through)", ha="center", va="center",
-             color=fs.MUTED, fontsize=7.5)
+             color=fs.MUTED, fontsize=8.5)
     axL.text(2.2, 5.05, "✗ leaves the sample", ha="center", va="center", color=fs.FAIL,
-             fontsize=8.0, fontweight="bold")
+             fontsize=8.5, fontweight="bold")
     _fbox(5.75, 5.5, 4.0, 1.45, fs.PASS)
     axL.text(7.75, 6.42, "survive to face the", ha="center", va="center", color="white",
              fontsize=8.7, fontweight="bold")
@@ -230,10 +251,10 @@ def fig4_debiasing():
     axL.text(5.65, 3.17, "velocity decline measured HERE", ha="center", va="center",
              color="white", fontsize=9.0, fontweight="bold")
     axL.text(5.65, 2.68, "only on survivors, pitchers already good enough to last",
-             ha="center", va="center", color="white", fontsize=7.7)
+             ha="center", va="center", color="white", fontsize=8.5)
     axL.text(5.0, 1.15, "the sample is conditioned on survival,\nso the raw signal is post-treatment",
-             ha="center", va="center", color=fs.MUTED, fontsize=8.2, style="italic")
-    axL.set_title("A signal defined only on the survivors", fontsize=10.6, pad=8)
+             ha="center", va="center", color=fs.MUTED, fontsize=8.5, style="italic")
+    axL.set_title("A signal defined only on the survivors", fontsize=10.6, pad=8, wrap=True)
 
     # ---- RIGHT: the AUC drop under debiasing ----
     x = np.arange(len(bars))
@@ -242,10 +263,14 @@ def fig4_debiasing():
         axR.bar(xi, a, width=0.6, color=c, zorder=3)
         axR.errorbar(xi, a, yerr=[[a - lo], [hi - a]], fmt="none",
                      ecolor=fs.INK, elinewidth=1.4, capsize=5, zorder=4)
-        axR.text(xi, hi + 0.006, f"{a:.3f}", ha="center", va="bottom",
-                 fontsize=10, fontweight="bold")
+        axR.text(xi, hi + 0.012, f"{a:.3f}", ha="center", va="bottom",
+                 fontsize=10, fontweight="bold",
+                 bbox=dict(boxstyle="round,pad=0.12", fc="white", ec="none"))
+        # White on the light NEUTRAL bar was unreadable; pick the label colour from
+        # the bar it sits on rather than assuming every bar is dark.
         axR.text(xi, 0.408, f"n={n}", ha="center", va="bottom", fontsize=8.5,
-                 color="white", fontweight="bold", zorder=5)
+                 color=fs.INK if c == fs.NEUTRAL else "white",
+                 fontweight="bold", zorder=5)
     axR.axhline(0.5, color=fs.MUTED, linewidth=1.2, linestyle="--")
     axR.text(2.42, 0.5, "coin\nflip", va="center", ha="left", fontsize=8.5, color=fs.MUTED)
     axR.set_xticks(x)
@@ -253,8 +278,8 @@ def fig4_debiasing():
     axR.set_ylabel("out-of-sample AUC  (P team scores > 4.5)")
     axR.set_ylim(0.40, 0.72)
     axR.set_xlim(-0.6, 2.9)
-    axR.set_title("Debiasing collapses the signal toward a coin flip", fontsize=10.6, pad=8)
-    fig.savefig(FIGDIR / "velocity_post_treatment_bias.png", bbox_inches="tight")
+    axR.set_title("Debiasing collapses the signal toward a coin flip", fontsize=10.6, pad=8, wrap=True)
+    fs.save_at_measure(fig, FIGDIR / "velocity_post_treatment_bias.png")
     plt.close(fig)
 
 
@@ -267,7 +292,7 @@ def fig5_transfer():
     nice = {"home_run": "HR", "triple": "3B", "double": "2B", "single": "1B",
             "hit_by_pitch": "HBP", "walk": "BB"}
     fs.setup()
-    fig, ax = plt.subplots(figsize=(7.2, 6.2))
+    fig, ax = plt.subplots(figsize=(fs.FULL_W, 5.9))
     # per-event label offsets (points) chosen to avoid the fit line & each other
     off = {"home_run": (0, 16), "triple": (10, 6), "double": (10, 12),
            "single": (14, 2), "hit_by_pitch": (12, -4), "walk": (-12, -14)}
@@ -304,8 +329,8 @@ def fig5_transfer():
     ax.set_ylabel("converged line move  ΔBook (+5 min)")
     ax.set_title("Every event type lies on one common slope\n"
                  "uniform attenuation (a measurement low-pass filter), not a per-event edge",
-                 fontsize=11)
-    fig.savefig(FIGDIR / "transfer_function.png", bbox_inches="tight")
+                 fontsize=11, wrap=True)
+    fs.save_at_measure(fig, FIGDIR / "transfer_function.png")
     plt.close(fig)
 
 
@@ -313,28 +338,24 @@ def fig5_transfer():
 # Figure 6 — market calibration: implied vs realized remaining runs
 # ─────────────────────────────────────────────────────────────────────────────
 def fig6_calibration():
-    cache = _load("encompass_cache.json")
-    Y = np.array([r["Y"] for r in cache], float)   # realized remaining runs
-    B = np.array([r["B"] for r in cache], float)   # market-implied remaining runs
+    # RIGHTS: this figure formerly read output/encompass_cache.json, which carries the
+    # sharp-book line B per half-inning snapshot -- a verbatim third-party quoted value.
+    # That cache is retained privately and is NOT redistributed. The figure is driven
+    # instead by a pre-computed aggregate containing only binned means, confidence
+    # intervals and histogram counts. There is deliberately NO fallback to the cache:
+    # if the aggregate is missing this raises, rather than silently reaching for
+    # restricted data.
+    agg = json.loads((HERE / "figdata" / "fig_market_calibration_agg.json").read_text())
     rr = _load("remaining_runs.json")
 
     fs.setup()
-    fig, (axL, axR) = plt.subplots(1, 2, figsize=(9.4, 4.3),
+    fig, (axL, axR) = plt.subplots(1, 2, figsize=(fs.FULL_W, 3.7),
                                    gridspec_kw={"width_ratios": [1, 1]})
 
-    # left — reliability: bin by predicted B (deciles), plot mean realized Y ± Wilson-ish SE
-    qs = np.quantile(B, np.linspace(0, 1, 11))
-    qs[-1] += 1e-6
-    idx = np.clip(np.digitize(B, qs) - 1, 0, 9)
-    bx, by, blo, bhi = [], [], [], []
-    for b in range(10):
-        m = idx == b
-        if m.sum() < 5:
-            continue
-        bx.append(B[m].mean()); by.append(Y[m].mean())
-        se = Y[m].std(ddof=1) / math.sqrt(m.sum())
-        blo.append(Y[m].mean() - 1.96 * se); bhi.append(Y[m].mean() + 1.96 * se)
-    bx, by = np.array(bx), np.array(by)
+    # left — reliability deciles, read straight from the aggregate
+    bins = agg["reliability_bins"]
+    bx = np.array([b["mean_B"] for b in bins]); by = np.array([b["mean_Y"] for b in bins])
+    blo = [b["ci_lo"] for b in bins]; bhi = [b["ci_hi"] for b in bins]
     lim = max(bx.max(), by.max()) * 1.05
     axL.plot([0, lim], [0, lim], color=fs.MUTED, linestyle="--", linewidth=1.2, zorder=1)
     axL.fill_between(bx, blo, bhi, color=fs.PALETTE[0], alpha=0.18, zorder=2)
@@ -344,24 +365,30 @@ def fig6_calibration():
     axL.set_aspect("equal")
     axL.set_xlabel("market-implied remaining runs")
     axL.set_ylabel("realized remaining runs")
-    axL.set_title("Market forecast ≈ calibrated (within this sample)", fontsize=11)
+    axL.set_title("Market forecast ≈ calibrated (within this sample)", fontsize=11, wrap=True)
     axL.text(0.04 * lim, 0.92 * lim, "on the diagonal ⇒ approximately\ncalibrated in this sample",
              fontsize=8.5, color=fs.MUTED, bbox=HALO)
 
     # right — book-error (Y − B) distribution; the thing nothing predicts
-    err = Y - B
-    axR.hist(err, bins=40, color=fs.PALETTE[4], edgecolor="white", linewidth=0.4, zorder=3)
+    # Same 40 bins the histogram always had, now supplied as edges+counts rather than
+    # recomputed from per-observation errors. Drawn with bar(align="edge") so the bars
+    # land on identical coordinates.
+    edges = np.array(agg["error_hist"]["bin_edges"], float)
+    counts = np.array(agg["error_hist"]["counts"], float)
+    err_mean = agg["error_mean"]
+    axR.bar(edges[:-1], counts, width=np.diff(edges), align="edge",
+            color=fs.PALETTE[4], edgecolor="white", linewidth=0.4, zorder=3)
     axR.axvline(0, color=fs.MUTED, linewidth=1.2, linestyle="--")
-    axR.axvline(err.mean(), color=fs.PALETTE[3], linewidth=2, zorder=4)
-    axR.text(err.mean(), axR.get_ylim()[1] * 0.96, f"  mean {err.mean():+.2f}",
+    axR.axvline(err_mean, color=fs.PALETTE[3], linewidth=2, zorder=4)
+    axR.text(err_mean, axR.get_ylim()[1] * 0.96, f"  mean {err_mean:+.2f}",
              color=fs.PALETTE[3], fontsize=9.5, fontweight="bold", va="top", bbox=HALO)
     axR.set_xlabel("book forecast error  (realized − implied)")
     axR.set_ylabel("half-inning snapshots")
     axR.set_title("Error: right-skewed (mean +0.49, median 0); unpredictable (OOS R² ≈ 0)",
-                  fontsize=9.5)
+                  fontsize=9.5, wrap=True)
     fig.suptitle(f"Remaining-runs calibration · {rr['n']:,} snapshots · model R² = {rr['r2_base']:.3f}",
-                 fontsize=12.5, fontweight="bold")
-    fig.savefig(FIGDIR / "market_calibration.png", bbox_inches="tight")
+                 fontsize=12.5, fontweight="bold", wrap=True)
+    fs.save_at_measure(fig, FIGDIR / "market_calibration.png")
     plt.close(fig)
 
 
@@ -386,7 +413,7 @@ def fig7_funnel(matrix):
         ("Exploitably profitable", prof, fs.FAIL),
     ]
     fs.setup()
-    fig, ax = plt.subplots(figsize=(8.6, 4.8))
+    fig, ax = plt.subplots(figsize=(fs.FULL_W, 4.1))
     n = len(stages)
     for i, (lab, cnt, col) in enumerate(stages):
         y = n - 1 - i
@@ -405,8 +432,8 @@ def fig7_funnel(matrix):
     ax.axis("off")
     ax.set_title("The incremental-information funnel\n"
                  "predicting runs is easy; predicting the market's error is the wall",
-                 fontsize=12.5, fontweight="bold", loc="center")
-    fig.savefig(FIGDIR / "incremental_information_funnel.png", bbox_inches="tight")
+                 fontsize=12.5, fontweight="bold", loc="center", wrap=True)
+    fs.save_at_measure(fig, FIGDIR / "incremental_information_funnel.png")
     plt.close(fig)
 
 
@@ -432,7 +459,7 @@ def fig1_process():
          "open frontier: live market microstructure", False),
     ]
     fs.setup()
-    fig, ax = plt.subplots(figsize=(8.6, 5.8))
+    fig, ax = plt.subplots(figsize=(fs.FULL_W, 4.9))
     n = len(steps)
     for i, (stage, outcome, killed) in enumerate(steps):
         y = n - 1 - i
@@ -454,9 +481,20 @@ def fig1_process():
     ax.set_xlim(-0.02, 1.04)
     ax.set_ylim(-0.05, n + 0.05)
     ax.axis("off")
+    # No auto-wrap here. matplotlib decides `wrap=True` breaks from the canvas width
+    # at draw time, and this title sits within a few pixels of the measure, so the
+    # raster and vector renditions of the same figure disagreed about it -- the PNG
+    # broke a one-word widow onto a second line, the SVG did not. Setting the line
+    # explicitly makes both renditions identical by construction. Same words, same
+    # size, one line.
+    # 11pt, the same size the other axes titles in this paper are set at. At 11.5 the
+    # single line was the widest artist on the canvas, so it set the crop -- and the
+    # raster and vector renderers disagree about a long string's width by about a
+    # percent, which is enough to pull the two renditions out of register. At 11 the
+    # crop is set by the figure body instead and both land on the measure.
     ax.set_title("The research process: each surviving explanation handed to a stricter test",
-                 fontsize=11.5, pad=12)
-    fig.savefig(FIGDIR / "research_process.png", bbox_inches="tight")
+                 fontsize=11, pad=12)
+    fs.save_at_measure(fig, FIGDIR / "research_process.png")
     plt.close(fig)
 
 
@@ -470,7 +508,7 @@ def fig_power():
     items = sorted(inc.items(), key=lambda kv: kv[1])
     floor = mde["mde_r2_snap"]
     fs.setup()
-    fig, ax = plt.subplots(figsize=(7.8, 4.8))
+    fig, ax = plt.subplots(figsize=(fs.FULL_W, 4.4))
     ys = np.arange(len(items))
     ax.axvspan(floor, 0.013, color=fs.PALETTE[2], alpha=0.06, zorder=0)
     for y, (k, v) in zip(ys, items):
@@ -482,17 +520,28 @@ def fig_power():
                 markeredgewidth=1.2 if near0 else 1.0, zorder=3)
     ax.axvline(0, color=fs.MUTED, lw=1.0)
     ax.axvline(floor, color=fs.INK, lw=1.4, ls="--")
-    ax.text(floor + 0.0003, len(items) - 0.4,
+    # The callout is wider than the shaded band it describes, so it necessarily
+    # crosses the dashed floor rule. Set it in the standard annotation box so the
+    # rule stops at the box edge instead of running through the glyphs.
+    ax.text(0.985, 0.975,
             f"minimum detectable\nincremental R² = {floor:.3f}\n(80% power, snapshots independent)",
-            fontsize=7.8, color=fs.INK, va="top", ha="left")
+            transform=ax.transAxes, fontsize=8.5, color=fs.INK, va="top", ha="right",
+            bbox=fs.box(fc="white"), zorder=5)
     ax.set_yticks(ys); ax.set_yticklabels([nice[k] for k, _ in items], fontsize=8.8)
     ax.set_xlabel("incremental out-of-sample R²  (beyond the market forecast)")
-    ax.set_xlim(-0.009, 0.013); ax.set_ylim(-0.9, len(items) - 0.1)
+    ax.set_xlim(-0.009, 0.013); ax.set_ylim(-0.6, len(items) - 0.1)
+    # Default locator put ~11 labels across the axis; six is legible at 8.5pt.
+    ax.xaxis.set_major_locator(MaxNLocator(nbins=6))
     ax.set_title("Every feature's incremental information falls below the detection floor",
-                 fontsize=11, pad=10)
-    ax.text(0.013, -0.75, f"conservative floor (games independent): {mde['mde_r2_games']:.2f}, off-scale right",
-            ha="right", va="center", fontsize=7.6, color=fs.MUTED, style="italic")
-    fig.savefig(FIGDIR / "appendix_power.png", bbox_inches="tight")
+                 fontsize=11, pad=10, wrap=True)
+    # Outside the plotting region entirely: at y=-0.75 in data coordinates this
+    # note printed across the x-axis rule and its tick labels.
+    ax.text(1.0, -0.155, f"conservative floor (games independent): {mde['mde_r2_games']:.2f}, off-scale right",
+            transform=ax.transAxes, ha="right", va="top", fontsize=8.5,
+            color=fs.MUTED, style="italic", clip_on=False)
+    # No bottom-margin call here either: the note below the axis is clip_on=False,
+    # so save_at_measure's tight bounding box already grows to include it.
+    fs.save_at_measure(fig, FIGDIR / "appendix_power.png")
     plt.close(fig)
 
 

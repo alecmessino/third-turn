@@ -28,12 +28,16 @@ def test_merge_live_not_displaced_by_later_pregame():
 
 def test_load_closing_lines(tmp_path):
     p = tmp_path / "closing_lines.csv"
+    # Synthetic fixture. The earlier version of this test reproduced two rows verbatim
+    # from the collected closing-lines file, including real MLB game ids, real quoted
+    # totals and their commence times. Those are third-party observations and are not
+    # redistributed; the values below are invented and exercise the same parse paths.
     p.write_text("game_pk,pregame_total,n_books,commence_time,source\n"
-                 "823445,8.0,9,2026-07-01T22:41:00Z,theoddsapi\n"
+                 "100001,7.5,4,2020-01-01T00:00:00Z,synthetic\n"
                  "bad,row,,,\n"
-                 "824905,9.0,9,2026-07-01T23:16:00Z,theoddsapi\n")
+                 "100002,11.0,4,2020-01-01T01:00:00Z,synthetic\n")
     lines = load_closing_lines(p)
-    assert lines == {823445: 8.0, 824905: 9.0}
+    assert lines == {100001: 7.5, 100002: 11.0}
 
 
 def test_load_closing_lines_missing_file(tmp_path):

@@ -1,0 +1,67 @@
+{
+  "_description": "Aggregate replication input for Visual Companion Figure S3 (weather vs runs). Six weather buckets with mean runs, over-hit rate and Wilson interval. The pregame line enters only through the comparison final>pre; its value is discarded. No quoted line, identifier, timestamp or per-game value is present.",
+  "_source": "derived from output/encompass_cache.json (private; not redistributed)",
+  "_n_games": 163,
+  "buckets": [
+    {
+      "label": "wind in\n(<= -4)",
+      "n_games": 22,
+      "mean_runs": 7.818182,
+      "n_decided": 21,
+      "over_hits": 11,
+      "over_rate_pct": 52.380952,
+      "ci_lo_pct": 32.369218,
+      "ci_hi_pct": 71.656288
+    },
+    {
+      "label": "calm",
+      "n_games": 95,
+      "mean_runs": 9.242105,
+      "n_decided": 91,
+      "over_hits": 42,
+      "over_rate_pct": 46.153846,
+      "ci_lo_pct": 36.275262,
+      "ci_hi_pct": 56.34401
+    },
+    {
+      "label": "wind out\n(>= +4)",
+      "n_games": 46,
+      "mean_runs": 10.021739,
+      "n_decided": 43,
+      "over_hits": 23,
+      "over_rate_pct": 53.488372,
+      "ci_lo_pct": 38.91539,
+      "ci_hi_pct": 67.489174
+    },
+    {
+      "label": "cooler\n(< 75deg)",
+      "n_games": 76,
+      "mean_runs": 8.736842,
+      "n_decided": 74,
+      "over_hits": 31,
+      "over_rate_pct": 41.891892,
+      "ci_lo_pct": 31.324157,
+      "ci_hi_pct": 53.259921
+    },
+    {
+      "label": "warm\n(75-84deg)",
+      "n_games": 71,
+      "mean_runs": 9.816901,
+      "n_decided": 68,
+      "over_hits": 39,
+      "over_rate_pct": 57.352941,
+      "ci_lo_pct": 45.516569,
+      "ci_hi_pct": 68.402942
+    },
+    {
+      "label": "hot\n(>= 85deg)",
+      "n_games": 16,
+      "mean_runs": 9.375,
+      "n_decided": 13,
+      "over_hits": 6,
+      "over_rate_pct": 46.153846,
+      "ci_lo_pct": 23.205754,
+      "ci_hi_pct": 70.856568
+    }
+  ]
+}

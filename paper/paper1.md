@@ -1,12 +1,10 @@
 <div class="titleblock">
-<h1>From Pitcher Fatigue to Market Efficiency: A Forecast-Encompassing Test of Public Information in Live Baseball Wagering Markets</h1>
+<h1>Does the Market Already Know? Forecast Encompassing in Live Baseball Betting Markets</h1>
 <p class="epigraph">This paper asks whether publicly observable baseball information predicts outcomes, or merely predicts what the market already knows.</p>
 <p class="author">Alec Messino<br/><span class="affil">The Third Turn Research Initiative &middot; alec.messino@gmail.com</span></p>
 <p class="wp">Working Paper &middot; July 2026 &middot; Comments welcome</p>
 </div>
 
-<!-- Draft 1.0. Numbers are the committed values in output/*.json and regenerate from the
-committed caches. Build the PDF with python3 paper/build_pdf.py. -->
 
 ## Abstract
 
@@ -323,10 +321,10 @@ the original feeds.
 
 The full pipeline, including the collector, is released at
 `https://github.com/alecmessino/third-turn`, with citation metadata in `CITATION.cff`. Release
-`v1.0` corresponds to the results reported here. The environment is Python 3.11.15 with
+commit `d709878` corresponds to the results reported here. The environment is Python 3.11.15 with
 dependencies pinned in `requirements-lock.txt`, and the analysis is versioned on three independent
 axes, Protocol 1.0, Collector 1.1, and Benchmark Dataset 2026.06, because method, engineering, and
-data evolve separately. From a clean checkout of the release tag, installing the pinned requirements
+data evolve separately. From a clean checkout of that commit, installing the pinned requirements
 and running the scripts documented in `paper/REPRODUCE.md` regenerates every figure and the
 manuscript from the committed inputs.
 
@@ -762,11 +760,32 @@ forecast error is unpredictable.
 
 ## Data and code availability
 
-The cleaned data, feature schema, and frozen result files are released as the Third Turn Benchmark
-Dataset (v1), openly available at `https://github.com/alecmessino/third-turn` under release tag
-`v1.0`, together with the Third Turn Protocol, its safeguard registry, and its objective stopping
-rules. Reference implementations reproduce every number reported here from the committed inputs. A
-persistent archival DOI is being minted and will be added on deposit.
+The analysis and figure code, the feature schema and field-level data dictionary, synthetic
+fixtures, the frozen result files, and their SHA-256 manifest are available at
+`https://github.com/alecmessino/third-turn`, together with the Third Turn Protocol, its safeguard
+registry, and its objective stopping rules. `paper/REPRODUCE.md` documents the exact commands and
+the pinned environment.
+
+**The underlying observational records are not redistributed.** The sportsbook quote panel, the
+per-market provenance and delivery-metadata records, and the game-state panel were obtained from
+commercial and public endpoints whose terms govern their reuse. The Odds API's terms prohibit
+redistributing its data as downloadable files, and MLB Advanced Media permits only individual,
+non-commercial, non-bulk use of its materials absent written authorization. Those records, and any
+derived file from which an individual quoted line, price, timestamp or third-party identifier could
+be reconstructed, are therefore withheld and are covered by no licence granted here.
+
+What is published in their place is the set of aggregate replication inputs from which the figures
+regenerate: binned means, histogram counts, bucket rates and confidence intervals, none of which
+carries a per-observation value. Every number reported in this paper is verifiable against those
+inputs and the committed result files. Readers should understand that this is reproducibility of the
+reported quantities, **not** independent recomputation from the raw feed, which the governing terms
+do not permit us to enable. One companion figure showing a single game's line trajectory is
+inherently observation-level; it is published as a frozen rendered image, and its underlying series
+is withheld pending written permission from the data provider.
+
+Author-created material — code under MIT, and the manuscripts, figures and documentation under CC BY
+4.0 — carries those licences. No open licence is asserted over any third-party-derived observation.
+A persistent archival deposit and DOI will follow only if and when the terms review permits one.
 
 ## References
 
@@ -794,8 +813,8 @@ Giacomini, R., and H. White (2006). "Tests of Conditional Predictive Ability." *
 Hanley, J. A., and B. J. McNeil (1982). "The Meaning and Use of the Area Under a Receiver
 Operating Characteristic (ROC) Curve." *Radiology* 143(1): 29-36.
 
-Messino, A. (2026). "What Prices Cannot Tell You: Identifying Information Transmission in Live
-Markets." Working paper, The Third Turn Research Initiative.
+Messino, A. (2026). "What Prices Cannot Tell You: Identification Limits of Information
+Transmission in High-Frequency Markets." Working paper, The Third Turn Research Initiative.
 
 Sauer, R. D. (1998). "The Economics of Wagering Markets." *Journal of Economic Literature* 36(4):
 2021-2064.
